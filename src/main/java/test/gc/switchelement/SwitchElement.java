@@ -1,19 +1,19 @@
-package test.gc.switchele;
+package test.gc.switchelement;
 import emu.grasscutter.plugin.Plugin;
-import test.gc.switchele.commands.SwitchElement;
+import test.gc.switchelement.commands.SwitchElementCommand;
 /**
  * The Grasscutter plugin template.
  * This is the main class for the plugin.
  */
-public final class Switchele extends Plugin {
+public final class SwitchElement extends Plugin {
     /* Turn the plugin into a singleton. */
-    private static Switchele instance;
+    private static SwitchElement instance;
 
     /**
      * Gets the plugin instance.
      * @return A plugin singleton.
      */
-    public static Switchele getInstance() {
+    public static SwitchElement getInstance() {
         return instance;
     }
     
@@ -25,7 +25,7 @@ public final class Switchele extends Plugin {
         instance = this;
         
         // Log a plugin status message.
-        this.getLogger().info("The SwitchElement has been loaded.");
+        this.getLogger().info("SwitchElementCommand plugin has been loaded.");
     }
 
     /**
@@ -33,10 +33,10 @@ public final class Switchele extends Plugin {
      */
     @Override public void onEnable() {
         // Register commands.
-        this.getHandle().registerCommand(new SwitchElement());
+        this.getHandle().registerCommand(new SwitchElementCommand());
 
         // Log a plugin status message.
-        this.getLogger().info("The SwitchElement has been enabled.");
+        this.getLogger().info("SwitchElementCommand plugin has been enabled.");
     }
 
     /**
@@ -44,6 +44,6 @@ public final class Switchele extends Plugin {
      */
     @Override public void onDisable() {
         // Log a plugin status message.
-        this.getLogger().info("The SwitchElement has been disabled.");
+        this.getLogger().info("SwitchElementCommand plugin has been disabled.");
     }
 }

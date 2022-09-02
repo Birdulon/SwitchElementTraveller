@@ -1,13 +1,10 @@
 {
-  "name": "Switch Element Plugin",
-  "description": "Smoll plugin to make my life easier",
-  "version": "1",
-  "authors": [ "One guy from grasscutter github (feat. Penelopeep)" ],
+  "name": "Switch Element Command Plugin",
+  "description": "Switch traveler skill depot",
+  "version": "2",
+  "authors": [ "One guy from grasscutter github (feat. Penelopeep)", "Birdulon" ],
 
-  "mainClass": "test.gc.switchele.Switchele",
+  "mainClass": "test.gc.switchelement.SwitchElement",
 
-  "comments": [
-    "Never gonna give you up.",
-    "Never gonna let you down."
-  ]
+  "comments": []
 }
