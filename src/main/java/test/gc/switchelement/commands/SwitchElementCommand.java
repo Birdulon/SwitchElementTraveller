@@ -10,7 +10,7 @@ import emu.grasscutter.server.packet.send.PacketSceneEntityAppearNotify;
 
 import java.util.List;
 
-@Command(label = "switchelement", usage = "<White|Anemo|Geo|Electro|Dendro>", aliases = {"se"}, threading = true)
+@Command(label = "switchelement", usage = "<White|Anemo|Geo|Electro|Dendro>", aliases = {"se", "depot"}, threading = true)
 public class SwitchElementCommand implements CommandHandler {
     private ElementType getElementFromString(String elementString) {
         return switch (elementString.toLowerCase()) {
@@ -26,19 +26,6 @@ public class SwitchElementCommand implements CommandHandler {
         };
     }
 
-    private boolean changeAvatarElement(Player player, int avatarId, ElementType element) {
-        var avatar = player.getAvatars().getAvatarById(avatarId);
-        int depotId = element.getDepotValue() + ((avatarId == GameConstants.MAIN_CHARACTER_MALE) ? 500 : 700);
-        var skillDepot = GameData.getAvatarSkillDepotDataMap().get(depotId);
-        if (avatar == null || skillDepot == null) {
-            return false;
-        }
-        avatar.setSkillDepotData(skillDepot);
-        avatar.setCurrentEnergy(1000);
-        avatar.save();
-        return true;
-    }
-
     @Override
     public void execute(Player sender, Player targetPlayer, List<String> args) {
         if (args.size() != 1) {
@@ -46,23 +33,39 @@ public class SwitchElementCommand implements CommandHandler {
             return;
         }
 
-        var element = getElementFromString(args.get(0));
-        if (element == null) {
-            CommandHandler.sendMessage(sender, "Invalid element");
+        var avatar = targetPlayer.getTeamManager().getCurrentAvatarEntity().getAvatar();  // potential NPEs but w/e
+        if (avatar == null) return;  // should never happen but w/e
+
+        int avatarId = avatar.getAvatarId();
+        int depotId;
+
+        try {
+            depotId = Integer.parseInt(args.get(0));
+        } catch (NumberFormatException ignored) {
+            var element = getElementFromString(args.get(0));
+            if (element == null) {
+                CommandHandler.sendMessage(sender, "Invalid element.");
+                return;
+            }
+            depotId = element.getDepotValue() + ((avatarId == GameConstants.MAIN_CHARACTER_FEMALE) ? 700 : 500);
+        }
+
+        var skillDepot = GameData.getAvatarSkillDepotDataMap().get(depotId);
+        if (skillDepot == null) {
+            CommandHandler.sendMessage(sender, "Invalid skill depot.");
             return;
         }
 
-        boolean maleSuccess = changeAvatarElement(targetPlayer, GameConstants.MAIN_CHARACTER_MALE, element);
-        boolean femaleSuccess = changeAvatarElement(targetPlayer, GameConstants.MAIN_CHARACTER_FEMALE, element);
-        if (maleSuccess || femaleSuccess) {
-            int scene = targetPlayer.getSceneId();
-            var senderPos = targetPlayer.getPosition();
-            targetPlayer.getWorld().transferPlayerToScene(targetPlayer, 1, senderPos);
-            targetPlayer.getWorld().transferPlayerToScene(targetPlayer, scene, senderPos);
-            targetPlayer.getScene().broadcastPacket(new PacketSceneEntityAppearNotify(targetPlayer));
-            CommandHandler.sendMessage(sender, "Successfully changed traveller to " + element.name());
-        } else {
-            CommandHandler.sendMessage(sender, "Failed to change the Element.");
-        }
+        avatar.setSkillDepotData(skillDepot);
+        avatar.setCurrentEnergy(1000);
+        avatar.save();
+        CommandHandler.sendMessage(sender, "Successfully changed depot to " + depotId);
+
+        // Reload scene to apply changes
+        int scene = targetPlayer.getSceneId();
+        var senderPos = targetPlayer.getPosition();
+        targetPlayer.getWorld().transferPlayerToScene(targetPlayer, 1, senderPos);
+        targetPlayer.getWorld().transferPlayerToScene(targetPlayer, scene, senderPos);
+        targetPlayer.getScene().broadcastPacket(new PacketSceneEntityAppearNotify(targetPlayer));
     }
 }
